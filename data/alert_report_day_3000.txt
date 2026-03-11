@@ -1,0 +1,7 @@
+FLOOD ALERT REPORT — Day 3000 (Year 9, Day-of-Year 80)
+Total zones: 2500
+Flooded zones: 2 (0.1%)
+
+       day        date  zone_id  rainfall_mm  soil_saturation  eff_runoff  exp_discharge  obs_discharge  degradation_factor  d1_hydraulic  d2_stress  d3_efficiency  drift_index  drift_memory  load_ratio  adaptive_thresh  flood_event      w1      w2      w3           land_use  drain_capacity  grid_row  grid_col severity
+2222  3000  2028-03-19     2222        96.14            81.08       67.56          54.05          37.83                 0.3           0.3     0.2724         0.0675       0.2635        0.2549      0.9081           0.8296            1  0.0503  0.8996  0.0501  residential_dense           59.52        44        22     MILD
+1740  3000  2028-03-19     1740        94.86            83.54       67.24          57.16          40.01                 0.3           0.3     0.2627         0.1042       0.1220        0.1232      0.8756           0.8401            1  0.0503  0.0503  0.8994         industrial           65.28        34        40     MILD
