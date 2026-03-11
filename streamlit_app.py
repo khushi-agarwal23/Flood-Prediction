@@ -15,12 +15,31 @@ Glitch fixes applied:
 import streamlit as st
 import pandas as pd
 import numpy as np
-
-  # MUST be before importing pyplot
-import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
 import os
+import sys
 from datetime import datetime, timedelta
+
+# Print debug info
+st.write("Debug: Starting app...")
+st.write(f"Python version: {sys.version}")
+
+# Try importing matplotlib with error handling
+try:
+    import matplotlib
+    st.write(f"✅ matplotlib version: {matplotlib.__version__}")
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    import matplotlib.colors as mcolors
+    st.write("✅ matplotlib imported successfully")
+except ImportError as e:
+    st.error(f"❌ Failed to import matplotlib: {e}")
+    st.error("Please check your requirements.txt file")
+    st.stop()
+except Exception as e:
+    st.error(f"❌ Other error with matplotlib: {e}")
+    st.stop()
+
+# Rest of your code...
 
 # ─────────────────────────────────────────────────────────────────────────────
 # PAGE CONFIG  (must be first Streamlit call)
@@ -1024,5 +1043,6 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
