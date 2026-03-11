@@ -15,33 +15,15 @@ Glitch fixes applied:
 import streamlit as st
 import pandas as pd
 import numpy as np
+import matplotlib
+matplotlib.use("Agg")    # MUST be before importing pyplot
+import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 import os
-import sys
 from datetime import datetime, timedelta
-
-# Print debug info
-st.write("Debug: Starting app...")
-st.write(f"Python version: {sys.version}")
-
-# Try importing matplotlib with error handling
-try:
-    import matplotlib
-    st.write(f"✅ matplotlib version: {matplotlib.__version__}")
-    matplotlib.use("Agg")
-    import matplotlib.pyplot as plt
-    import matplotlib.colors as mcolors
-    st.write("✅ matplotlib imported successfully")
-except ImportError as e:
-    st.error(f"❌ Failed to import matplotlib: {e}")
-    st.error("Please check your requirements.txt file")
-    st.stop()
-except Exception as e:
-    st.error(f"❌ Other error with matplotlib: {e}")
-    st.stop()
-
-
-           
-
+import time
+import subprocess
+import sys
 # ─────────────────────────────────────────────────────────────────────────────
 # PAGE CONFIG  (must be first Streamlit call)
 # ─────────────────────────────────────────────────────────────────────────────
@@ -988,6 +970,7 @@ def page_maintenance(sim_label: str):
 # ─────────────────────────────────────────────────────────────────────────────
 # MAIN
 # ─────────────────────────────────────────────────────────────────────────────
+
 def main():
     # Custom CSS — dark theme polish, no layout glitches
     st.markdown("""
@@ -1001,7 +984,6 @@ def main():
         .stSelectbox label, .stMultiselect label, .stSlider label { color:#8b949e !important; }
         div[data-testid="stSidebarContent"] { background:#010409; }
         .stPlotlyChart { border-radius:8px; }
-        /* Fix metric delta color */
         .stMetricDelta { font-size:11px !important; }
     </style>
     """, unsafe_allow_html=True)
@@ -1016,7 +998,7 @@ def main():
         st.markdown("""
         ### Welcome! 
         This is your first time running the app. We need to generate the simulation data.
-        
+
         **This will take approximately 10-15 minutes** as it runs through all 7 phases:
         - Phase 1: City Construction
         - Phase 2: Drainage Infrastructure
@@ -1026,45 +1008,42 @@ def main():
         - Phase 6: Self Learning
         - Phase 7: Final Processing
         """)
-        
+
         col1, col2 = st.columns(2)
-        
+
         with col1:
             if st.button("▶️ Start Setup", type="primary"):
-                # Create placeholders for status
                 status = st.empty()
                 progress = st.progress(0)
                 output_area = st.empty()
-                
+
                 status.info("🔄 Running main.py...")
-                
-                # Run main.py and capture output in real-time
+
                 process = subprocess.Popen(
-                    [sys.executable, 'main.py'],
+                    [sys.executable, "main.py"],
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                     text=True,
                     bufsize=1
                 )
-                
-                # Read output line by line
+
                 output_lines = []
                 phase_count = 0
-                
+
                 for line in process.stdout:
                     output_lines.append(line)
-                    # Update output area (show last 10 lines)
-                    output_area.code(''.join(output_lines[-10:]))
-                    
-                    # Update progress based on phase detection
-                    if 'phase' in line.lower():
+
+                    # Show last 10 lines
+                    output_area.code("".join(output_lines[-10:]))
+
+                    # Update progress
+                    if "phase" in line.lower():
                         phase_count += 1
                         progress.progress(min(phase_count / 7, 0.95))
                         status.info(f"📍 {line.strip()}")
-                
-                # Wait for completion
+
                 process.wait()
-                
+
                 if process.returncode == 0:
                     progress.progress(1.0)
                     status.success("✅ Setup complete! Reloading app...")
@@ -1073,45 +1052,45 @@ def main():
                 else:
                     status.error("❌ Setup failed. Check output below.")
                     st.code(process.stderr.read())
-        
+
         with col2:
             if st.button("📋 View Instructions"):
                 st.info("""
                 **Manual Setup Instructions:**
-                
-                If you prefer to run locally:This will generate all necessary data files.""")
 
-# Stop here - don't show the main app
-    st.stop()
-# ============================================
-# MAIN APP ROUTING (only runs if data exists)
-# ============================================
-       if "City Overview" in page:
-       page_city_overview(sim_label)
-       elif "7-Day Forecast" in page:
-       page_7day_forecast(sim_label)
-       elif "Historical Trends" in page:
-       page_historical_trends(sim_label)
-       elif "Infrastructure Health" in page:
-       page_infrastructure_health(sim_label)
-       elif "Self-Learning" in page:
-       page_self_learning(sim_label)
-       elif "ML vs Rule" in page:
-       page_ml_vs_rule(sim_label)
-       elif "Maintenance" in page:
-       page_maintenance(sim_label)
+                If you prefer to run locally:
+                This will generate all necessary data files.
+                """)
+
+        # Stop here if setup hasn't been run
+        st.stop()
+
+    # ============================================
+    # MAIN APP ROUTING (only runs if data exists)
+    # ============================================
+    if "City Overview" in page:
+        page_city_overview(sim_label)
+
+    elif "7-Day Forecast" in page:
+        page_7day_forecast(sim_label)
+
+    elif "Historical Trends" in page:
+        page_historical_trends(sim_label)
+
+    elif "Infrastructure Health" in page:
+        page_infrastructure_health(sim_label)
+
+    elif "Self-Learning" in page:
+        page_self_learning(sim_label)
+
+    elif "ML vs Rule" in page:
+        page_ml_vs_rule(sim_label)
+
+    elif "Maintenance" in page:
+        page_maintenance(sim_label)
 
 
 if __name__ == "__main__":
-main()
-      
-
-
-
-  
-
-
-
-
+    main()   
 
 
