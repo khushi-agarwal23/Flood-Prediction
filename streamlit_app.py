@@ -16,7 +16,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib
-matplotlib.use("Agg")   # MUST be before any pyplot import — prevents Streamlit thread crash
+matplotlib.use("Agg")    # MUST be before importing pyplot
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import os
@@ -1022,4 +1022,5 @@ def main():
 
 
 if __name__ == "__main__":
+
     main()
