@@ -39,7 +39,75 @@ except Exception as e:
     st.error(f"❌ Other error with matplotlib: {e}")
     st.stop()
 
-# Rest of your code...
+data_files = ['city_data.csv', 'drainage_data.csv', 'simulation_results.csv']
+data_exists = any(os.path.exists(f) for f in data_files)
+
+if not data_exists:
+    st.title("🚀 Flood Prediction System - First Time Setup")
+    st.markdown("""
+    ### Welcome! 
+    This is your first time running the app. We need to generate the simulation data.
+    
+    **This will take approximately 10-15 minutes** as it runs through all 7 phases:
+    - Phase 1: City Construction
+    - Phase 2: Drainage Infrastructure
+    - Phase 3: Data Generation (longest step)
+    - Phase 4: Simulation Engine
+    - Phase 5: Flood Prediction
+    - Phase 6: Self Learning
+    - Phase 7: Final Processing
+    """)
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        if st.button("▶️ Start Setup", type="primary"):
+            # Create placeholders for status
+            status = st.empty()
+            progress = st.progress(0)
+            output_area = st.empty()
+            
+            status.info("🔄 Running main.py...")
+            
+            # Run main.py and capture output in real-time
+            process = subprocess.Popen(
+                [sys.executable, 'main.py'],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                bufsize=1
+            )
+            
+            # Read output line by line
+            output_lines = []
+            phase_count = 0
+            
+            for line in process.stdout:
+                output_lines.append(line)
+                # Update output area (show last 10 lines)
+                output_area.code(''.join(output_lines[-10:]))
+                
+                # Update progress based on phase detection
+                if 'phase' in line.lower():
+                    phase_count += 1
+                    progress.progress(min(phase_count / 7, 0.95))
+                    status.info(f"📍 {line.strip()}")
+            
+            # Wait for completion
+            process.wait()
+            
+            if process.returncode == 0:
+                progress.progress(1.0)
+                status.success("✅ Setup complete! Reloading app...")
+                time.sleep(2)
+                st.rerun()
+            else:
+                status.error("❌ Setup failed. Check output below.")
+                st.code(process.stderr.read())
+    
+    with col2:
+        if st.button("📋 View Instructions"):
+           
 
 # ─────────────────────────────────────────────────────────────────────────────
 # PAGE CONFIG  (must be first Streamlit call)
@@ -1043,6 +1111,7 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
 
 
