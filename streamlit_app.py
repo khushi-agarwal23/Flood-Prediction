@@ -15,7 +15,7 @@ Glitch fixes applied:
 import streamlit as st
 import pandas as pd
 import numpy as np
-import matplotlib
+
   # MUST be before importing pyplot
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
@@ -1024,4 +1024,5 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
