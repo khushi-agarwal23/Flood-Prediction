@@ -1079,36 +1079,37 @@ def main():
                 st.info("""
                 **Manual Setup Instructions:**
                 
-                If you prefer to run locally:
-This will generate all necessary data files.
-""")
+                If you prefer to run locally:This will generate all necessary data files.""")
 
 # Stop here - don't show the main app
-st.stop()
-
+    st.stop()
 # ============================================
 # MAIN APP ROUTING (only runs if data exists)
 # ============================================
-if   "City Overview"         in page: 
-page_city_overview(sim_label)
-elif "7-Day Forecast"        in page: 
-page_7day_forecast(sim_label)
-elif "Historical Trends"     in page: 
-page_historical_trends(sim_label)
-elif "Infrastructure Health" in page: 
-page_infrastructure_health(sim_label)
-elif "Self-Learning"         in page: 
-page_self_learning(sim_label)
-elif "ML vs Rule"            in page: 
-page_ml_vs_rule(sim_label)
-elif "Maintenance"           in page: 
-page_maintenance(sim_label)
+       if "City Overview" in page:
+       page_city_overview(sim_label)
+       elif "7-Day Forecast" in page:
+       page_7day_forecast(sim_label)
+       elif "Historical Trends" in page:
+       page_historical_trends(sim_label)
+       elif "Infrastructure Health" in page:
+       page_infrastructure_health(sim_label)
+       elif "Self-Learning" in page:
+       page_self_learning(sim_label)
+       elif "ML vs Rule" in page:
+       page_ml_vs_rule(sim_label)
+       elif "Maintenance" in page:
+       page_maintenance(sim_label)
 
 
 if __name__ == "__main__":
 main()
+      
+
+
 
   
+
 
 
 
