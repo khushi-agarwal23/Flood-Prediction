@@ -340,13 +340,22 @@ def render_sidebar():
 def page_city_overview(sim_label: str):
     st.header("🏙️ City Overview")
 
-    city_df    = load_city()
-    zone_risk  = compute_zone_risk(sim_label)
-    daily      = compute_daily_city_stats(sim_label)
+    city_df = load_city()
+    zone_risk = compute_zone_risk(sim_label)
 
-    if zone_risk.empty:
-        st.warning("Run the simulation first (python main.py). Data not found.")
+    # ── SAFEGUARD: ensure zone_risk has required columns before proceeding ──
+    required_cols = ["grid_row","grid_col","risk","final_degradation","land_use"]
+    if zone_risk.empty or not all(col in zone_risk.columns for col in required_cols):
+        st.warning("Simulation data missing or incomplete. Run the simulation first.")
         return
+
+    # If grid_row/col missing, create them
+    if "grid_row" not in zone_risk.columns or "grid_col" not in zone_risk.columns:
+        n = int(np.sqrt(len(zone_risk)))
+        zone_risk["grid_row"] = np.repeat(np.arange(n), n)
+        zone_risk["grid_col"] = np.tile(np.arange(n), n)
+
+    daily = compute_daily_city_stats(sim_label)
 
     grid_n = int(np.sqrt(len(zone_risk)))
 
@@ -364,10 +373,26 @@ def page_city_overview(sim_label: str):
     # ── Heatmaps row ─────────────────────────────────────────────────────
     col1, col2, col3 = st.columns(3)
 
-    risk_map  = {"SAFE":0,"MODERATE":1,"HIGH":2,"CRITICAL":3}
     risk_cmap = mcolors.ListedColormap(["#4caf50","#ffeb3b","#ff9800","#f44336"])
-    risk_grid = zone_risk.sort_values(["grid_row","grid_col"])["risk"].map(
-        risk_map).values.reshape(grid_n, grid_n)
+
+    # Map risk levels
+    risk_map  = {"SAFE":0,"MODERATE":1,"HIGH":2,"CRITICAL":3}
+
+    # Create grid from data
+    max_row = int(zone_risk["grid_row"].max()) + 1
+    max_col = int(zone_risk["grid_col"].max()) + 1
+
+    risk_grid = np.full((max_row, max_col), np.nan)
+
+    for _, r in zone_risk.iterrows():
+        risk_grid[int(r["grid_row"]), int(r["grid_col"])] = risk_map.get(r["risk"], 0)
+
+    # Crop empty rows/cols
+    mask = ~np.isnan(risk_grid)
+    rows = np.where(mask.any(axis=1))[0]
+    cols = np.where(mask.any(axis=0))[0]
+
+    risk_grid = risk_grid[rows.min():rows.max()+1, cols.min():cols.max()+1]
 
     with col1:
         fig = make_heatmap(risk_grid, "Flood Risk Classification",
@@ -375,8 +400,10 @@ def page_city_overview(sim_label: str):
                            tick_labels=["SAFE","MOD","HIGH","CRIT"])
         st.pyplot(fig); plt.close(fig)
 
-    deg_grid = zone_risk.sort_values(["grid_row","grid_col"])[
-        "final_degradation"].values.reshape(grid_n, grid_n)
+    deg_grid = np.full((max_row, max_col), np.nan)
+
+    for _, r in zone_risk.iterrows():
+        deg_grid[int(r["grid_row"]), int(r["grid_col"])] = r["final_degradation"]
     with col2:
         fig = make_heatmap(deg_grid, "Final Degradation Factor",
                            cmap="YlOrRd", vmin=0, vmax=0.30,
@@ -413,7 +440,6 @@ def page_city_overview(sim_label: str):
     dist_df.columns = ["Risk Level","Count"]
     dist_df["Percentage"] = (dist_df["Count"] / len(zone_risk) * 100).round(1)
     st.dataframe(dist_df, use_container_width=True, hide_index=True)
-
 
 # ─────────────────────────────────────────────────────────────────────────────
 # PAGE: 7-DAY FORECAST
