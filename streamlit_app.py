@@ -62,10 +62,33 @@ def load_city() -> pd.DataFrame:
 @st.cache_data(show_spinner=False)
 def load_simulation(label: str) -> pd.DataFrame:
     path = os.path.join(DATA_DIR, f"simulation_{label}.csv")
+
     if not os.path.exists(path):
         return pd.DataFrame()
+
     df = pd.read_csv(path)
+
+    # ---- ensure required columns exist ----
+    required = {
+        "zone_id":0,
+        "day":0,
+        "date":"2020-01-01",
+        "rainfall_mm":0,
+        "flood_event":0,
+        "degradation_factor":0,
+        "drift_memory":0,
+        "load_ratio":0,
+        "w1":0.33,
+        "w2":0.33,
+        "w3":0.34
+    }
+
+    for col,val in required.items():
+        if col not in df.columns:
+            df[col] = val
+
     df["date"] = pd.to_datetime(df["date"])
+
     return df
 
 @st.cache_data(show_spinner=False)
@@ -88,7 +111,18 @@ def compute_zone_risk(sim_label: str) -> pd.DataFrame:
     sim_df  = load_simulation(sim_label)
     city_df = load_city()
     if sim_df.empty or city_df.empty:
-        return pd.DataFrame()
+        required_cols = ["grid_row","grid_col","risk","final_degradation","land_use"]
+
+        for col in required_cols:
+            if col not in zone_agg.columns:
+                if col == "risk":
+                    zone_agg[col] = "SAFE"
+                elif col == "land_use":
+                    zone_agg[col] = "urban"
+                else:
+                    zone_agg[col] = 0
+
+        return zone_agg
 
     n_days = sim_df["day"].max() + 1
     zone_agg = sim_df.groupby("zone_id").agg(
