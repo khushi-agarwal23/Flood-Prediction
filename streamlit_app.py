@@ -126,19 +126,18 @@ def compute_zone_risk(sim_label: str) -> pd.DataFrame:
 
     n_days = sim_df["day"].max() + 1
     zone_agg = sim_df.groupby("zone_id").agg(
-        total_flood_days  = ("flood_event",        "sum"),
-        avg_degradation   = ("degradation_factor", "mean"),
-        final_degradation = ("degradation_factor", "last"),
-        avg_drift_memory  = ("drift_memory",        "mean"),
-        final_drift       = ("drift_memory",        "last"),
-        max_load_ratio    = ("load_ratio",          "max"),
-        avg_load_ratio    = ("load_ratio",          "mean"),
-        final_w1          = ("w1",                  "last"),
-        final_w2          = ("w2",                  "last"),
-        final_w3          = ("w3",                  "last"),
+        flood_days=("flood_event","sum"),
+        total_days=("day","count"),
+        avg_degradation=("degradation_factor","mean"),
+        final_degradation=("degradation_factor","last"),
+        drift_memory=("drift_memory","mean"),
+        load_ratio=("load_ratio","mean"),
+        w1=("w1","mean"),
+        w2=("w2","mean"),
+        w3=("w3","mean")
     ).reset_index()
 
-    zone_agg["flood_rate"] = zone_agg["total_flood_days"] / n_days
+    zone_agg["flood_rate"] = zone_agg["flood_days"] / zone_agg["total_days"]
 
     # Risk classification — calibrated to give realistic spread
     zone_agg["risk"] = pd.cut(
