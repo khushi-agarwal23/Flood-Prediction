@@ -1,64 +1,58 @@
 import pandas as pd
 import numpy as np
-import os
-from datetime import datetime, timedelta
-
-os.makedirs("data", exist_ok=True)
 
 grid_size = 50
 days = 100
 
+zones = []
+
+for r in range(grid_size):
+    for c in range(grid_size):
+        zones.append({
+            "zone_id": r * grid_size + c,
+            "grid_row": r,
+            "grid_col": c,
+            "land_use": np.random.choice(["urban","industrial","residential","green"])
+        })
+
+zones_df = pd.DataFrame(zones)
+
 rows = []
-start_date = datetime(2020,1,1)
 
 for day in range(days):
+    for _, z in zones_df.iterrows():
 
-    current_date = start_date + timedelta(days=day)
+        rainfall = np.random.gamma(2, 10)
+        degradation = min(0.3, 0.002 * day + np.random.uniform(0,0.02))
+        if rainfall > 60:
+            risk = "CRITICAL"
+        elif rainfall > 40:
+            risk = "HIGH"
+        elif rainfall > 20:
+            risk = "MODERATE"
+        else:
+            risk = "SAFE"
 
-    for r in range(grid_size):
-        for c in range(grid_size):
+        rows.append({
+            "zone_id": z.zone_id,
+            "grid_row": z.grid_row,
+            "grid_col": z.grid_col,
+            "land_use": z.land_use,
+            "day": day,
+            "date": pd.Timestamp("2020-01-01") + pd.Timedelta(days=day),
+            "rainfall_mm": rainfall,
+            "degradation_factor": degradation,
+            "risk": risk
+        })
 
-            rainfall = np.random.gamma(2, 10)  # realistic rainfall distribution
+sim = pd.DataFrame(rows)
 
-            risk = np.random.choice(
-                ["SAFE","MODERATE","HIGH","CRITICAL"],
-                p=[0.7,0.2,0.08,0.02]
-            )
+sim_10yr = sim
+sim_5yr = sim[sim["day"] < days/2]
 
-            rows.append({
-                "date": current_date,
-                "day": day,
-                "zone_id": r*grid_size + c,
-                "grid_row": r,
-                "grid_col": c,
+zones_df.to_csv("data/city_zones.csv", index=False)
+sim_10yr.to_csv("data/simulation_10yr.csv", index=False)
+sim_5yr.to_csv("data/simulation_5yr.csv", index=False)
 
-                "rainfall_mm": rainfall,
-
-                "risk": risk,
-                "final_degradation": np.random.uniform(0,0.30),
-
-                "land_use": np.random.choice([
-                    "residential_light",
-                    "residential_dense",
-                    "commercial",
-                    "industrial",
-                    "mixed_use",
-                    "green_space"
-                ]),
-
-                "flood_event": np.random.choice([0,1], p=[0.95,0.05]),
-                "load_ratio": np.random.uniform(0.2,1.2),
-                "drift_memory": np.random.uniform(0,0.1),
-                "degradation_factor": np.random.uniform(0,0.30),
-
-                "w1": np.random.uniform(0.2,0.4),
-                "w2": np.random.uniform(0.2,0.4),
-                "w3": np.random.uniform(0.2,0.4)
-            })
-
-df = pd.DataFrame(rows)
-
-df.to_csv("data/simulation_10yr.csv", index=False)
-df.to_csv("data/simulation_5yr.csv", index=False)
-
-print("Sample data created:", len(df), "rows")
+print("10yr rows:", len(sim_10yr))
+print("5yr rows:", len(sim_5yr))
