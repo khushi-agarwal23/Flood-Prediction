@@ -1,4 +1,0 @@
-# Ignore large CSVs
-data/simulation_10yr.csv
-data/simulation_5yr.csv
-data/flood_predictions_ml.csv
