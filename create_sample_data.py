@@ -22,13 +22,13 @@ rows = []
 for day in range(days):
     for _, z in zones_df.iterrows():
 
-        rainfall = np.random.gamma(2, 10)
-        degradation = min(0.3, 0.002 * day + np.random.uniform(0,0.02))
-        if rainfall > 60:
+        rainfall = np.random.gamma(3, 20)
+        degradation = min(0.3, 0.003 * day + np.random.uniform(0,0.03))
+        if rainfall > 80:
             risk = "CRITICAL"
-        elif rainfall > 40:
+        elif rainfall > 60:
             risk = "HIGH"
-        elif rainfall > 20:
+        elif rainfall > 30:
             risk = "MODERATE"
         else:
             risk = "SAFE"
