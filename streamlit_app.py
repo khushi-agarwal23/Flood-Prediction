@@ -150,8 +150,8 @@ def compute_zone_risk(sim_label: str) -> pd.DataFrame:
     zone_agg["maint_score"] = (
         0.35 * (zone_agg["final_degradation"] / 0.30) +
         0.30 * (zone_agg["flood_rate"] / 0.25) +
-        0.20 * zone_agg["final_drift"] +
-        0.15 * (zone_agg["max_load_ratio"] / 2.0)
+        0.20 * zone_agg["drift_memory"] +
+        0.15 * (zone_agg["load_ratio"] / 2.0)
     ).clip(0, 1).round(4)
 
     # Normalize health column name before merge
